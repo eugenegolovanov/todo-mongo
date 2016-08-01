@@ -7,10 +7,10 @@ var _                   = require('underscore');
 var app = express();
 var PORT = process.env.PORT || 3000; // process.env.PORT - heroku port
 
-
+//Mongoose
 mongoose.Promise = global.Promise;//REMOVE WARNING
 mongoose.connect('mongodb://localhost/todo-mongo'); // connect to database
-var Todo   = require('./models/todo.js');
+var Todo = require('./models/todo.js');
 
 
 //add bodyParser as middleware to app
@@ -29,45 +29,43 @@ app.get('/', function (req, res) {
 //GET all todos or filtered  /todos?completed=false&q=haircut
 app.get('/todos', function (req, res) {
 
-	// var query = req.query;//req.query give us string not boolean,
-	// var where = {};
+	var query = req.query;//req.query give us string not boolean,
+	var where = {};
 
-	//Filter todos with just current user 
+	// //Filter todos with just current user 
 	// where = {
 	// 	 userId: req.user.get('id') // we access req.user that we assign in middleware
 	// };
 
 
 	//Work With q Query    /todos?completed=false
-	// if (query.hasOwnProperty('completed') && query.completed === 'false') {
-	// 	where.completed = false;
-	// } else if (query.hasOwnProperty('completed') && query.completed === 'true') {
-	// 	where.completed = true;
-	// }
-
+	if (query.hasOwnProperty('completed') && query.completed === 'false') {
+		where.completed = false;
+	} else if (query.hasOwnProperty('completed') && query.completed === 'true') {
+		where.completed = true;
+	}
 
 
 
 	//Work With 'q' Query    /todos?q=something
-	// if (query.hasOwnProperty('q') && query.q.length > 0) {
-	// 	where.description = {
-	// 		$like: '%' + query.q + '%',
-	// 	};
-	// }
+	if (query.hasOwnProperty('q') && query.q.length > 0) {
+		where.description = {
+            "$regex": query.q, "$options": "i"
+		};
+	}
 
-	// //FETCH FROM SQLITE
-	// db.todo.findAll({where: where}).then(function (sqTodos) {
-
-	// 	res.json(sqTodos);//response as json no need to stringify
-
-	// }, function (e) {
-	// 	res.status(500).send();//500 status - server error
-	// });
+    console.log('--------------------------------------------------');
+    console.log(where);
+    console.log('--------------------------------------------------');
 
 
-    //
-
-
+    //Query from Mongo
+    Todo.find(where, function(err, todos) {
+        if (err) {
+        return res.status(500).json(err);//500 status - server error
+        }
+           res.json(todos);//response as json no need to stringify
+    });
 
 
 
