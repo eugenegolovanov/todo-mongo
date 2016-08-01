@@ -1,8 +1,16 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+var express             = require('express');
+var bodyParser          = require('body-parser');
+var mongoose            = require('mongoose');
+var _                   = require('underscore');
+
 
 var app = express();
 var PORT = process.env.PORT || 3000; // process.env.PORT - heroku port
+
+
+mongoose.Promise = global.Promise;//REMOVE WARNING
+mongoose.connect('mongodb://localhost/todo-mongo'); // connect to database
+var Todo   = require('./models/todo.js');
 
 
 //add bodyParser as middleware to app
@@ -17,7 +25,7 @@ app.get('/', function (req, res) {
 
 //====================================================================
 //GET all todos or filtered  /todos?completed=false&q=haircut
-app.get('/todos', middleware.requireAuthentication, function (req, res) {
+//app.get('/todos', middleware.requireAuthentication, function (req, res) {
 
 	// var query = req.query;//req.query give us string not boolean,
 	// var where = {};
@@ -54,7 +62,7 @@ app.get('/todos', middleware.requireAuthentication, function (req, res) {
 	// 	res.status(500).send();//500 status - server error
 	// });
 
-});
+//});
 //=====================================================================
 
 
@@ -63,25 +71,54 @@ app.get('/todos', middleware.requireAuthentication, function (req, res) {
 
 //=====================================================================
 //POST todo
-app.post('/todos', middleware.requireAuthentication, function (req, res) {
+app.post('/todos', function (req, res) {
 
-////////////WITH DATABASE REFACTOR////////////////
-	//req.body - Body requested
-	//_.pick - filter body with 'description' and 'completed' properties
-	var body = _.pick(req.body, 'description', 'completed');
+// ////////////WITH DATABASE REFACTOR////////////////
+// 	//req.body - Body requested
+// 	//_.pick - filter body with 'description' and 'completed' properties
+	// var body = _.pick(req.body, 'description', 'completed');
 
-	db.todo.create(body).then(function (todo) {
+// 	db.todo.create(body).then(function (todo) {
 
-		req.user.addTodo(todo).then(function () {
-			//Add todo to that user by adding users 'id' into 'userId' 
-			return todo.reload();
-		}).then(function (todo) {
-			res.json(todo.toJSON());
-		});
+// 		req.user.addTodo(todo).then(function () {
+// 			//Add todo to that user by adding users 'id' into 'userId' 
+// 			return todo.reload();
+// 		}).then(function (todo) {
+// 			res.json(todo.toJSON());
+// 		});
 
-	}, function (e) {
-		res.status(400).json(e);
-	});
+// 	}, function (e) {
+		// res.status(400).json(e);
+// 	});
+
+
+    //
+	var body = _.pick(req.body, 'description', 'completed', 'priority');
+
+    // console.log('--------------Body-----------------');
+    // console.log(req.body);
+    // console.log('-----------------------------------');
+
+
+
+
+    // Create Todo
+    var todo = new Todo({ 
+        description: body.description, 
+        completed: body.completed, 
+        priority: body.priority
+    });
+
+  // save Todo
+  todo.save(function(err) {
+    if (err) {
+      return res.status(404).send();
+    }
+
+    console.log('Todo saved successfully');
+    res.json(body);
+  });
+
 
 });
 //=====================================================================
