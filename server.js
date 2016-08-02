@@ -115,28 +115,6 @@ app.post('/todos', function (req, res) {
 //GET todos by id   /todos/:id
 app.get('/todos/:id', function (req, res) {
 
-	// var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
-
-	// //get requested todo object (refactored with underscore library)
-	// var matchedTodo = _.findWhere(todos, {id: requestedId});//findWhere finds matching items 
-
-	// if (matchedTodo) {
-	// 	res.json(matchedTodo);
-	// } else {
-	// 	res.status(404).send();
-	// }
-
-////////////WITH DATABASE REFACTOR////////////////
-
-
-	// {where {userId: req.user.id}};
-
-
-    console.log('-------------------------------------------------');
-    console.log(req.params.id);
-    console.log('-------------------------------------------------');
-
-
 		// //FETCH FROM SQLITE
 		// db.todo.findOne({
 		// 	where: {
@@ -156,7 +134,6 @@ app.get('/todos/:id', function (req, res) {
 		// });
 
 
-
         //Query from Mongo
         Todo.findOne({'_id' : req.params.id }, function(err, todo) {
             if (err) {
@@ -166,7 +143,6 @@ app.get('/todos/:id', function (req, res) {
             }
             res.json(todo);//response as json no need to stringify
         });
-
 
 });
 //=====================================================================
