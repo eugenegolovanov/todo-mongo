@@ -111,6 +111,71 @@ app.post('/todos', function (req, res) {
 
 
 
+//=====================================================================
+//GET todos by id   /todos/:id
+app.get('/todos/:id', function (req, res) {
+
+	// var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
+
+	// //get requested todo object (refactored with underscore library)
+	// var matchedTodo = _.findWhere(todos, {id: requestedId});//findWhere finds matching items 
+
+	// if (matchedTodo) {
+	// 	res.json(matchedTodo);
+	// } else {
+	// 	res.status(404).send();
+	// }
+
+////////////WITH DATABASE REFACTOR////////////////
+
+
+	// {where {userId: req.user.id}};
+
+
+    console.log('-------------------------------------------------');
+    console.log(req.params.id);
+    console.log('-------------------------------------------------');
+
+
+		// //FETCH FROM SQLITE
+		// db.todo.findOne({
+		// 	where: {
+		// 		id: requestedId,
+		//  		userId: req.user.get('id') // we access req.user that we assign in middleware
+		// 	}
+		// }).then(function (todo) {
+
+		// 	if (!!todo) {
+		// 		res.json(todo.toJSON());
+		// 	} else {
+		// 		res.status(404).send();
+		// 	}
+
+		// }, function (e) {
+			// res.status(500).send();//500 status - server error
+		// });
+
+
+
+        //Query from Mongo
+        Todo.findOne({'_id' : req.params.id }, function(err, todo) {
+            if (err) {
+            // return res.status(500).json(err);//500 status - server error
+            return res.status(500).json({"todo":"Not Found"});//500 status - server error
+
+            }
+            res.json(todo);//response as json no need to stringify
+        });
+
+
+});
+//=====================================================================
+
+
+
+
+
+
 
 
 
