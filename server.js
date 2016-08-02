@@ -64,7 +64,7 @@ app.get('/todos', function (req, res) {
         if (err) {
         return res.status(500).json(err);//500 status - server error
         }
-           res.json(todos);//response as json no need to stringify
+        res.status(200).json(todos);//response as json no need to stringify
     });
 
 
@@ -101,7 +101,7 @@ app.post('/todos', function (req, res) {
     }
 
     console.log('Todo saved successfully');
-    res.json(body);
+    res.status(200).json(body);
   });
 
 
@@ -138,10 +138,9 @@ app.get('/todos/:id', function (req, res) {
         Todo.findOne({'_id' : req.params.id }, function(err, todo) {
             if (err) {
             // return res.status(500).json(err);//500 status - server error
-            return res.status(500).json({"todo":"Not Found"});//500 status - server error
-
+            return res.status(404).json({"todo":"Not Found"});//500 status - server error
             }
-            res.json(todo);//response as json no need to stringify
+            res.status(200).json(todo);//response as json no need to stringify
         });
 
 });
@@ -150,7 +149,44 @@ app.get('/todos/:id', function (req, res) {
 
 
 
+//=====================================================================
+//DELETE todos by id   /todos/:id
+app.delete('/todos/:id', function (req, res) {
+	// var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
 
+	// //get requested todo object (refactored with underscore library)
+	// var todoToDelete = _.findWhere(todos, {id: requestedId});
+
+	// console.log('---------------------OLD TODOS:--------------------------------');
+	// console.log(todos);
+	// console.log('----------------------NEW TODOS:-------------------------------');
+	// todos = _.without(todos, todoToDelete);
+	// console.log(todos);
+	// console.log('----------------------------------------------------------------');
+
+	// if (todoToDelete) {
+	// 	res.json(todoToDelete);
+	// } else {
+	// 	res.status(404).json({"error":"no todo with matced id"});
+	// }
+
+////////////WITH DATABASE REFACTOR////////////////
+
+    //Remove from Mongo
+    Todo.remove({'_id' : req.params.id }, function(err, todo) {
+        if (err) {
+        // return res.status(500).json(err);//500 status - server error
+        return res.status(404).json({"todo":"Not Found"});//500 status - server error
+        }
+        // res.json(todo);//response as json no need to stringify
+        res.status(200).json({"todo":"Successfully Removed"});
+    });
+
+
+});
+
+
+//=====================================================================
 
 
 
