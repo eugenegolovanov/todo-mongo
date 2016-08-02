@@ -192,6 +192,56 @@ app.delete('/todos/:id', function (req, res) {
 
 
 
+
+
+
+//=====================================================================
+//PUT todos by id /todos/:id,  (update todos)
+app.put('/todos/:id', function (req, res) {
+
+	//req.body - Body requested
+	//_.pick - filter body with 'description' and 'completed' properties
+	var body = _.pick(req.body, 'description', 'completed', 'priority');
+	var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
+	var attributes = {};
+
+	//completed attribute
+	if (body.hasOwnProperty('completed')) {
+		//success, user provided attribute and it is boolean
+		attributes.completed = body.completed;
+	} 
+
+	//description attribute
+	if (body.hasOwnProperty('description')) {
+		//success, user provided attribute and it is string
+		attributes.description = body.description.trim();
+	} 
+
+    //priority attribute
+	if (body.hasOwnProperty('priority')) {
+		//success, user provided attribute and it is string
+		attributes.priority = body.priority;
+	} 
+
+
+    //Find and Update
+    Todo.findOneAndUpdate({'_id' : req.params.id }, {$set:attributes}, {new: true}, function(err, doc){
+        if(err){
+            return res.status(404).json({"todo":"Not Updated"});//500 status - server error
+        }
+
+        res.status(200).json(attributes);
+    });
+
+
+});
+//=====================================================================
+
+
+
+
+
+
 app.listen(PORT, function () {
     console.log('Listening port: ' + PORT);
 });
