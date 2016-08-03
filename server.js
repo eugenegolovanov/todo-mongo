@@ -11,7 +11,7 @@ var PORT = process.env.PORT || 3000; // process.env.PORT - heroku port
 mongoose.Promise = global.Promise;//REMOVE WARNING
 mongoose.connect('mongodb://localhost/todo-mongo'); // connect to database
 var Todo = require('./models/todo.js');
-
+var User = require('./models/user.js');
 
 //add bodyParser as middleware to app
 app.use(bodyParser.json());
@@ -238,6 +238,103 @@ app.put('/todos/:id', function (req, res) {
 //=====================================================================
 
 
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+/////////////////////USER///////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+//=====================================================================
+//POST /users
+app.post('/users', function (req, res) {
+
+	//req.body - Body requested
+	//_.pick - filter body with 'email' and 'password' properties
+	var body = _.pick(req.body, 'email', 'password');
+
+	// db.user.create(body).then(function (user) {
+	// 	res.json(user.toPublicJSON()) //toPublicJSON - method from user.js, works in instanceMethods
+	// }, function (e) {
+	// 	res.status(400).json(e);
+	// });
+
+
+
+	// create a user a new user
+	var user = new User({
+		email: body.email,
+		password: body.password
+	});
+
+	//save user to database
+	user.save(function(err) {
+        if(err){
+            return res.status(404).json(err);
+        }
+        res.status(200).json({"signed up successfully": body.password});
+	});
+
+});
+
+//=====================================================================
+
+
+
+//=====================================================================
+//POST users/login
+app.post('/users/login', function (req, res) {
+
+	//req.body - Body requested
+	//_.pick - filter body with 'email' and 'password' properties
+	var body = _.pick(req.body, 'email', 'password');
+	var userInstance;
+
+	//All functionality is in user.js file in  'authenticate' method
+	// db.user.authenticate(body).then(function (user) {
+
+	// 	var token = user.generateToken('authentication');
+	// 	userInstance = user;
+
+	// 	return db.token.create({
+	// 		token: token
+	// 	});
+
+	// }).then(function (tokenInstance) {
+	// 	res.header('Auth', tokenInstance.get('token')).json(userInstance.toPublicJSON());
+	// }).catch(function () {
+	// 	res.status(401).send();
+	// });
+
+
+	// fetch user and test password verification
+	User.findOne({ email: body.email }, function(err, user) {
+        if(err){
+            return res.status(404).json({"error":err});//500 status - server error
+        }
+
+		// test a matching password
+		user.comparePassword(body.password, function(err, isMatch) {
+			if(err){
+				return res.status(404).json({"error":"password not match"});//500 status - server error
+			}
+			if (isMatch){
+       		 	res.status(200).json({"Logged in Successfully": body.email});
+			} else {
+       		 	res.status(401).json({"Login error": "do not match"});
+			}
+		});
+
+	});
+
+
+
+
+
+});
+//=====================================================================
 
 
 
