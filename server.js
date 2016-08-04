@@ -15,6 +15,10 @@ var Todo = require('./models/todo.js');
 var User = require('./models/user.js');
 var Token = require('./models/token.js');
 
+
+var middleware = require('./middleware.js');
+var config = require('./config'); // get our config file
+
 //add bodyParser as middleware to app
 app.use(bodyParser.json());
 
@@ -29,7 +33,7 @@ app.get('/', function (req, res) {
 
 //====================================================================
 //GET all todos or filtered  /todos?completed=false&q=haircut
-app.get('/todos', function (req, res) {
+app.get('/todos', middleware.requireAuthentification, function (req, res) {
 
 	var query = req.query;//req.query give us string not boolean,
 	var where = {};
@@ -334,9 +338,9 @@ app.post('/users/login', function (req, res) {
 				try {
 					//stringData takes 'id' and 'type' and convert is to string for encryption
 					var stringData = JSON.stringify({id: user.id});
-					var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123!@#!').toString();//'abc123!@#!' - crypto-js password
+					var encryptedData = cryptojs.AES.encrypt(stringData, config.cryptojs).toString();//'abc123!@#!' - crypto-js password
 
-					var tokenEncodedJWT = jwt.sign({token: encryptedData}, 'qwerty098');//'qwerty098' - jwt password
+					var tokenEncodedJWT = jwt.sign({token: encryptedData}, config.jwt);//'qwerty098' - jwt password
 
 						//----------------------------------
 						// Create and Save TOKEN
