@@ -2,7 +2,7 @@ var express             = require('express');
 var bodyParser          = require('body-parser');
 var mongoose            = require('mongoose');
 var _                   = require('underscore');
-
+var jwt    				= require('jsonwebtoken'); // used to create, sign, and verify tokens
 
 var app = express();
 var PORT = process.env.PORT || 3000; // process.env.PORT - heroku port
@@ -309,25 +309,52 @@ app.post('/users/login', function (req, res) {
 	// });
 
 
-	// fetch user and test password verification
-	User.findOne({ email: body.email }, function(err, user) {
+
+	  // find the user
+  User.findOne({email: req.body.email}, function(err, user) {
         if(err){
-            return res.status(404).json({"error":err});//500 status - server error
+            return res.status(500).json({"error":"server error"});
         }
+
+    if (!user) {
+      	res.json({ success: false, message: 'Authentication failed. User not found.' });
+    } else if (user) {
 
 		// test a matching password
 		user.comparePassword(body.password, function(err, isMatch) {
 			if(err){
-				return res.status(404).json({"error":"password not match"});//500 status - server error
+				return res.status(404).json({"error":"password not match"});
 			}
 			if (isMatch){
-       		 	res.status(200).json({"Logged in Successfully": body.email});
+       		 	// res.status(200).json({"Logged in Successfully": body.email});
+
+				//TOKEN
+				var token = jwt.sign(user, 'jwtSuperSecret', {
+					expiresIn: 1440 // expires in 24 hours
+				});
+
+				// return the information including token as JSON
+				res.status(200).json({
+				success: true,
+				message: 'Enjoy your token!',
+				token: token
+				});
+
+
+
 			} else {
        		 	res.status(401).json({"Login error": "do not match"});
 			}
 		});
 
-	});
+
+
+
+
+    }
+
+  });
+
 
 
 
