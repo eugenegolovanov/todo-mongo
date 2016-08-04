@@ -323,7 +323,7 @@ app.post('/users/login', function (req, res) {
 		// test a matching password
 		user.comparePassword(body.password, function(err, isMatch) {
 			if(err){
-				return res.status(404).json({"error":"password not match"});
+				return res.status(500).json({"error":"server error"});
 			}
 			if (isMatch){
        		 	// res.status(200).json({"Logged in Successfully": body.email});
@@ -343,7 +343,7 @@ app.post('/users/login', function (req, res) {
 
 
 			} else {
-       		 	res.status(401).json({"Login error": "do not match"});
+       		 	res.status(401).json({"Login error": "password not match"});
 			}
 		});
 
