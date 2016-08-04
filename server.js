@@ -3,6 +3,7 @@ var bodyParser          = require('body-parser');
 var mongoose            = require('mongoose');
 var _                   = require('underscore');
 var jwt    				= require('jsonwebtoken'); // used to create, sign, and verify tokens
+var cryptojs 			= require('crypto-js');
 
 var app = express();
 var PORT = process.env.PORT || 3000; // process.env.PORT - heroku port
@@ -12,6 +13,7 @@ mongoose.Promise = global.Promise;//REMOVE WARNING
 mongoose.connect('mongodb://localhost/todo-mongo'); // connect to database
 var Todo = require('./models/todo.js');
 var User = require('./models/user.js');
+var Token = require('./models/token.js');
 
 //add bodyParser as middleware to app
 app.use(bodyParser.json());
@@ -328,19 +330,31 @@ app.post('/users/login', function (req, res) {
 			if (isMatch){
        		 	// res.status(200).json({"Logged in Successfully": body.email});
 
-				//TOKEN
-				var token = jwt.sign(user, 'jwtSuperSecret', {
-					expiresIn: 1440 // expires in 24 hours
-				});
+				 //TOKEN
+				try {
+					//stringData takes 'id' and 'type' and convert is to string for encryption
+					var stringData = JSON.stringify({id: user.id});
+					var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123!@#!').toString();//'abc123!@#!' - crypto-js password
 
-				// return the information including token as JSON
-				res.status(200).json({
-				success: true,
-				message: 'Enjoy your token!',
-				token: token
-				});
+					var tokenEncodedJWT = jwt.sign({token: encryptedData}, 'qwerty098');//'qwerty098' - jwt password
 
+						//----------------------------------
+						// Create and Save TOKEN
+						var token = new Token({
+							tokenHash: tokenEncodedJWT
+						});
+						//save token to database
+						token.save(function(err) {
+							if(err){
+								return res.status(404).json(err);
+							}
+							res.status(200).json({"signed up successfully": tokenEncodedJWT});
+						});
+						//----------------------------------
 
+				} catch (e) {
+					return res.status(500).json({"error":"token error"});
+				}
 
 			} else {
        		 	res.status(401).json({"Login error": "password not match"});
@@ -348,15 +362,9 @@ app.post('/users/login', function (req, res) {
 		});
 
 
-
-
-
     }
 
   });
-
-
-
 
 
 
