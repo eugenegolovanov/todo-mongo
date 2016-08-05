@@ -6,5 +6,6 @@ var Schema = mongoose.Schema;
 module.exports = mongoose.model('Todo', new Schema({ 
     description: String, 
     completed: Boolean, 
-    priority: Number
+    priority: Number,
+    userId: String
 }));

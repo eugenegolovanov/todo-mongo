@@ -38,10 +38,10 @@ app.get('/todos', middleware.requireAuthentification, function (req, res) {
 	var query = req.query;//req.query give us string not boolean,
 	var where = {};
 
-	// //Filter todos with just current user 
-	// where = {
-	// 	 userId: req.user.get('id') // we access req.user that we assign in middleware
-	// };
+	//Filter todos with just current user 
+	where = {
+		 userId: req.user.get('_id') // we access req.user that we assign in middleware
+	};
 
 
 	//Work With q Query    /todos?completed=false
@@ -84,7 +84,7 @@ app.get('/todos', middleware.requireAuthentification, function (req, res) {
 
 //=====================================================================
 //POST todo
-app.post('/todos', function (req, res) {
+app.post('/todos', middleware.requireAuthentification, function (req, res) {
 
 	var body = _.pick(req.body, 'description', 'completed', 'priority');
 
@@ -97,7 +97,8 @@ app.post('/todos', function (req, res) {
     var todo = new Todo({ 
         description: body.description, 
         completed: body.completed, 
-        priority: body.priority
+        priority: body.priority,
+		userId : req.user.get('_id')
     });
 
   // Save Todo
@@ -107,7 +108,7 @@ app.post('/todos', function (req, res) {
     }
 
     console.log('Todo saved successfully');
-    res.status(200).json(body);
+    res.status(200).json(todo);
   });
 
 
