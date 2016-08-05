@@ -168,36 +168,34 @@ app.get('/todos/:id', middleware.requireAuthentification, function (req, res) {
 
 //=====================================================================
 //DELETE todos by id   /todos/:id
-app.delete('/todos/:id', function (req, res) {
-	// var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
+app.delete('/todos/:id', middleware.requireAuthentification, function (req, res) {
 
-	// //get requested todo object (refactored with underscore library)
-	// var todoToDelete = _.findWhere(todos, {id: requestedId});
+	    //Query from Mongo
+        Todo.findOne({
+			'_id' : req.params.id,
+			 'userId': req.user.get('_id')
+		}, function(err, todo) {
+            if (err) {
+            	return res.status(404).json({"todo":"Not Found"});
+            } else {
 
-	// console.log('---------------------OLD TODOS:--------------------------------');
-	// console.log(todos);
-	// console.log('----------------------NEW TODOS:-------------------------------');
-	// todos = _.without(todos, todoToDelete);
-	// console.log(todos);
-	// console.log('----------------------------------------------------------------');
+				if (typeof todo !== 'undefined' && todo !== null) {
 
-	// if (todoToDelete) {
-	// 	res.json(todoToDelete);
-	// } else {
-	// 	res.status(404).json({"error":"no todo with matced id"});
-	// }
+					//REMOVE
+					todo.remove({}, function(err) {
+						if (err) {
+							return res.status(404).json({"todo":"Not Found"});
+						} else {
+							return res.status(200).json({"todo":"Successfully Removed"});
+						}
+					});
 
-////////////WITH DATABASE REFACTOR////////////////
+				} else {
+            		return res.status(401).json({"todo":"Not Found"});
+				}
 
-    //Remove from Mongo
-    Todo.remove({'_id' : req.params.id }, function(err, todo) {
-        if (err) {
-        // return res.status(500).json(err);//500 status - server error
-        return res.status(404).json({"todo":"Not Found"});//500 status - server error
-        }
-        // res.json(todo);//response as json no need to stringify
-        res.status(200).json({"todo":"Successfully Removed"});
-    });
+			}
+        });
 
 
 });
