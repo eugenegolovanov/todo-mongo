@@ -120,7 +120,7 @@ app.post('/todos', middleware.requireAuthentification, function (req, res) {
 
 //=====================================================================
 //GET todos by id   /todos/:id
-app.get('/todos/:id', function (req, res) {
+app.get('/todos/:id', middleware.requireAuthentification, function (req, res) {
 
 		// //FETCH FROM SQLITE
 		// db.todo.findOne({
@@ -142,12 +142,22 @@ app.get('/todos/:id', function (req, res) {
 
 
         //Query from Mongo
-        Todo.findOne({'_id' : req.params.id }, function(err, todo) {
+        Todo.findOne({
+			'_id' : req.params.id,
+			 'userId': req.user.get('_id')
+		}, function(err, todo) {
             if (err) {
-            // return res.status(500).json(err);//500 status - server error
-            return res.status(404).json({"todo":"Not Found"});//500 status - server error
-            }
-            res.status(200).json(todo);//response as json no need to stringify
+           		 // return res.status(500).json(err);//500 status - server error
+            	return res.status(404).json({"todo":"Not Found"});
+            } else {
+
+				if (typeof todo !== 'undefined' && todo !== null) {
+					res.status(200).json(todo);//response as json no need to stringify
+				} else {
+            		return res.status(401).json({"todo":"Not Found"});
+				}
+
+			}
         });
 
 });
