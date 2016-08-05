@@ -133,7 +133,7 @@ app.get('/todos/:id', middleware.requireAuthentification, function (req, res) {
             } else {
 
 				if (typeof todo !== 'undefined' && todo !== null) {
-					res.status(200).json(todo);//response as json no need to stringify
+					return res.status(200).json(todo);//response as json no need to stringify
 				} else {
             		return res.status(401).json({"todo":"Not Found"});
 				}
@@ -193,7 +193,7 @@ app.delete('/todos/:id', middleware.requireAuthentification, function (req, res)
 
 //=====================================================================
 //PUT todos by id /todos/:id,  (update todos)
-app.put('/todos/:id', function (req, res) {
+app.put('/todos/:id', middleware.requireAuthentification, function (req, res) {
 
 	//req.body - Body requested
 	//_.pick - filter body with 'description' and 'completed' properties
@@ -221,12 +221,22 @@ app.put('/todos/:id', function (req, res) {
 
 
     //Find and Update
-    Todo.findOneAndUpdate({'_id' : req.params.id }, {$set:attributes}, {new: true}, function(err, doc){
+    Todo.findOneAndUpdate({
+			'_id' : req.params.id,
+			 'userId': req.user.get('_id')
+		}, {$set:attributes}, {new: true}, function(err, todo){
         if(err){
             return res.status(404).json({"todo":"Not Updated"});//500 status - server error
-        }
+        } else {
 
-        res.status(200).json(attributes);
+				if (typeof todo !== 'undefined' && todo !== null) {
+					return res.status(200).json(todo);
+				} else {
+            		return res.status(401).json({"todo":"Not Found"});
+				}
+
+		}
+
     });
 
 
