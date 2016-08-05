@@ -122,25 +122,6 @@ app.post('/todos', middleware.requireAuthentification, function (req, res) {
 //GET todos by id   /todos/:id
 app.get('/todos/:id', middleware.requireAuthentification, function (req, res) {
 
-		// //FETCH FROM SQLITE
-		// db.todo.findOne({
-		// 	where: {
-		// 		id: requestedId,
-		//  		userId: req.user.get('id') // we access req.user that we assign in middleware
-		// 	}
-		// }).then(function (todo) {
-
-		// 	if (!!todo) {
-		// 		res.json(todo.toJSON());
-		// 	} else {
-		// 		res.status(404).send();
-		// 	}
-
-		// }, function (e) {
-			// res.status(500).send();//500 status - server error
-		// });
-
-
         //Query from Mongo
         Todo.findOne({
 			'_id' : req.params.id,
