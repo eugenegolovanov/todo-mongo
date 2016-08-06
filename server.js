@@ -10,7 +10,12 @@ var PORT = process.env.PORT || 3000; // process.env.PORT - heroku port
 
 //Mongoose
 mongoose.Promise = global.Promise;//REMOVE WARNING
-mongoose.connect('mongodb://localhost/todo-mongo'); // connect to database
+// var uri = 'mongodb://localhost/todo-mongo';// Local
+var uri = 'mongodb://framegenerator@gmail.com:sigareta83@ds145415.mlab.com:45415/todo-mongo';//mongolab
+
+
+db = mongoose.connect(uri);
+
 var Todo = require('./models/todo.js');
 var User = require('./models/user.js');
 var Token = require('./models/token.js');
