@@ -36,7 +36,7 @@ var middleware = {
                             res.json({ success: false, message: 'Authentication failed. User not found.' });
                         } else if (user) {
                             //SUCCESS
-                            console.log('++++++++User Authorized+++++++++');
+                            console.log('++++++++Authorized User+++++++++');
                             req.user = user;
                             next();
                         }

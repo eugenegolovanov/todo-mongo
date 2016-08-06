@@ -60,9 +60,9 @@ app.get('/todos', middleware.requireAuthentification, function (req, res) {
 		};
 	}
 
-    console.log('--------------------------------------------------');
-    console.log(where);
-    console.log('--------------------------------------------------');
+    // console.log('--------------------------------------------------');
+    // console.log(where);
+    // console.log('--------------------------------------------------');
 
 
     //Query from Mongo
@@ -90,7 +90,7 @@ app.post('/todos', middleware.requireAuthentification, function (req, res) {
 
 	//Check body if properties are valid types
 	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0 || !_.isNumber(body.priority)) {
-		return res.status(400).json({ validTypes: false, });//400 - user provided bad data
+		return res.status(401).json({ validTypes: false, });//400 - user provided bad data
 	}
 
     // Create Todo
@@ -100,6 +100,7 @@ app.post('/todos', middleware.requireAuthentification, function (req, res) {
         priority: body.priority,
 		userId : req.user.get('_id')
     });
+
 
   // Save Todo
   todo.save(function(err) {
@@ -198,7 +199,7 @@ app.put('/todos/:id', middleware.requireAuthentification, function (req, res) {
 	//req.body - Body requested
 	//_.pick - filter body with 'description' and 'completed' properties
 	var body = _.pick(req.body, 'description', 'completed', 'priority');
-	var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
+	// var requestedId = parseInt(req.params.id, 10); //parseInt converts string to Int
 	var attributes = {};
 
 	//completed attribute
@@ -218,7 +219,6 @@ app.put('/todos/:id', middleware.requireAuthentification, function (req, res) {
 		//success, user provided attribute and it is string
 		attributes.priority = body.priority;
 	} 
-
 
     //Find and Update
     Todo.findOneAndUpdate({
@@ -261,14 +261,6 @@ app.post('/users', function (req, res) {
 	//_.pick - filter body with 'email' and 'password' properties
 	var body = _.pick(req.body, 'email', 'password');
 
-	// db.user.create(body).then(function (user) {
-	// 	res.json(user.toPublicJSON()) //toPublicJSON - method from user.js, works in instanceMethods
-	// }, function (e) {
-	// 	res.status(400).json(e);
-	// });
-
-
-
 	// create a user a new user
 	var user = new User({
 		email: body.email,
@@ -297,23 +289,6 @@ app.post('/users/login', function (req, res) {
 	//_.pick - filter body with 'email' and 'password' properties
 	var body = _.pick(req.body, 'email', 'password');
 	var userInstance;
-
-	//All functionality is in user.js file in  'authenticate' method
-	// db.user.authenticate(body).then(function (user) {
-
-	// 	var token = user.generateToken('authentication');
-	// 	userInstance = user;
-
-	// 	return db.token.create({
-	// 		token: token
-	// 	});
-
-	// }).then(function (tokenInstance) {
-	// 	res.header('Auth', tokenInstance.get('token')).json(userInstance.toPublicJSON());
-	// }).catch(function () {
-	// 	res.status(401).send();
-	// });
-
 
 
 	  // find the user
@@ -352,7 +327,9 @@ app.post('/users/login', function (req, res) {
 							if(err){
 								return res.status(404).json(err);
 							}
-							res.status(200).json({"signed up successfully": tokenEncodedJWT});
+							// res.status(200).json({"signed up successfully": tokenEncodedJWT});
+							res.header('x-access-token', tokenEncodedJWT).json({"signed up successfully": "token in header"});
+
 						});
 						//----------------------------------
 
