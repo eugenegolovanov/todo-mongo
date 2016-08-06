@@ -338,7 +338,7 @@ app.post('/users/login', function (req, res) {
 				}
 
 			} else {
-       		 	res.status(401).json({"Login error": "password not match"});
+       		 	return res.status(401).json({"Login error": "password not match"});
 			}
 		});
 
@@ -352,6 +352,32 @@ app.post('/users/login', function (req, res) {
 });
 //=====================================================================
 
+
+
+
+//=====================================================================
+//DELETE /users/login
+app.delete('/users/login', middleware.requireAuthentification, function (req, res) {
+
+        var token = req.headers['x-access-token'];
+		var tokenHash = cryptojs.MD5(token).toString();
+
+		// console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-');
+		// console.log(tokenHash);
+		// console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-');
+
+		//REMOVE Token
+		Token.remove({tokenHash: tokenHash}, function(err) {
+			if (err) {
+				return res.status(500).json({"token":"Not Found"});
+			} else {
+				return res.status(204).json({"token":"Successfully Removed"});
+			}
+		});
+
+});
+
+//=====================================================================
 
 
 
