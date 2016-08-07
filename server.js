@@ -266,16 +266,26 @@ app.post('/users', function (req, res) {
 	//_.pick - filter body with 'email' and 'password' properties
 	var body = _.pick(req.body, 'email', 'password');
 
+	//Lowercase Email
+	if (typeof body.email === 'string') {
+		body.email = body.email.toLowerCase();				
+	} else {
+		return res.status(404).json(err);
+	}
+
+
 	// create a user a new user
 	var user = new User({
 		email: body.email,
 		password: body.password
 	});
 
+
+
 	//save user to database
 	user.save(function(err) {
         if(err){
-            return res.status(404).json(err);
+            return res.status(401).json(err);
         }
         res.status(200).json({"signed up successfully": body.password});
 	});
@@ -294,6 +304,14 @@ app.post('/users/login', function (req, res) {
 	//_.pick - filter body with 'email' and 'password' properties
 	var body = _.pick(req.body, 'email', 'password');
 	var userInstance;
+
+	//Lowercase Email
+	if (typeof body.email === 'string') {
+		body.email = body.email.toLowerCase();				
+	} else {
+		return res.status(404).json(err);
+	}
+
 
 
 	  // find the user
